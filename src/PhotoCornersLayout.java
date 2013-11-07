@@ -31,7 +31,7 @@ import java.util.Map;
  * <p>
  * <b>Now the cool thing:</b> you can specify a corner to always keep the same 
  * distance (e.g. 20px) to one (or 2) of the parents borders. Or you can 
- * make it keep a relative distance of 10% of the parents width or height
+ * make it keep a relative distance of e.g. 10% of the parents width or height
  * to one of its borders.
  * <br>
  * Say you want your child component to keep a distance of 10px to the parents

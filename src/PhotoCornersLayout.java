@@ -1,3 +1,19 @@
+/*
+ * PhotoCornersLayout.java
+ *
+ * Copyright 2013 David Haegele
+ *
+ * This class is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This class is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -79,6 +95,7 @@ import java.util.Map;
  * side.
  * 
  * @author David Haegele
+ * @version 1.1
  *
  */
 public class PhotoCornersLayout implements LayoutManager2 {

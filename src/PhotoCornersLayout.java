@@ -195,6 +195,7 @@ public class PhotoCornersLayout implements LayoutManager2 {
 		// apply
 		child.setSize(x2Pos-x1Pos, y2Pos-y1Pos);
 		child.setLocation(x1Pos, y1Pos);
+//		child.doLayout(); // not yet sure if that is necessary
 //		System.out.println("x1 " + x1Pos);
 //		System.out.println("x2 " + x2Pos);
 //		System.out.println("y1 " + y1Pos);

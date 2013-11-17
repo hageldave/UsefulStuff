@@ -6,10 +6,26 @@ import java.awt.PopupMenu;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
-import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-
+/**
+ * This JPanel is a container for another JPanel. It can be used to create some
+ * eyecandy because it can switch the displayed JPanel with another one showing
+ * an animation that slides the currently displayed Panel out to one side while
+ * sliding in the new Panel to display from the opposite side. For this to
+ * happen use the 
+ * <code>{@link PanelSwitchingPanel#switchPanel(JPanel, Side, int)}</code>
+ * method.
+ * <p>
+ * The displayed JPanel will be displayed within the bounds of this 
+ * PanelSwitchingPanel at the same size. So if you want to change the size or
+ * location  of the displayed JPanel, use the PanelSwitchingPanels methods for
+ * that, so display wont get messed up.
+ * 
+ * @author David Haegele
+ * @version 1.1
+ */
+@SuppressWarnings("serial")
 public class PanelSwitchingPanel extends JPanel {
 	public static final Side LEFT = Side.left;
 	public static final Side RIGTH = Side.right;
@@ -17,10 +33,16 @@ public class PanelSwitchingPanel extends JPanel {
 	public static final Side BOTTOM = Side.bottom;
 	
 
+	/** currently displayed Panel */
 	private JPanel currentPanel;
+	/** tells if a panel switching operation is in progress */
 	private volatile Boolean isSwitching = false;
 	
-	
+	/**
+	 * Constructs a new PanelSwitchingPanel. The passed JPanel
+	 * will be displayed by this panel.
+	 * @param displaypanel initial JPanel to be displayed.
+	 */
 	public PanelSwitchingPanel(JPanel displaypanel) {
 		this.currentPanel = displaypanel;
 		super.setLayout(null);
@@ -35,18 +57,41 @@ public class PanelSwitchingPanel extends JPanel {
 		this._add(currentPanel);
 	}
 	
-	
+	/** 
+	 * protected add method that works like {@link JPanel#add(Component)}.<br>
+	 * This is a workarround to still offer the add method for in class usage
+	 * or usage of subclasses.
+	 * @param comp to be added.
+	 * @return the component argument
+	 */
 	protected Component _add(Component comp){
 		return super.add(comp);
 	}
 	
-	
+	/**
+	 * tells if this Panel is currently in a switchPanel operation from a
+	 * previous call of <code>{@link #switchPanel(JPanel, Side, int)}.</code>
+	 * @return true if there is a switch operation in progress
+	 */
 	public boolean isSwitching(){
 		return this.isSwitching;
 	}
 	
-	
-	public JPanel switchPanel(JPanel panel, Side from, int speedInMs) {
+	/**
+	 * switches the currently displayed JPanel with the specified one.
+	 * This {@link PanelSwitchingPanel} will perform that showing a sliding
+	 * animation where the old panel slides out and the new one in. The new
+	 * panel will slide in from the specified side (use one of
+	 * {@link PanelSwitchingPanel#TOP},{@link #LEFT},{@link #RIGTH},{@link #BOTTOM})
+	 * The shown animation will last the specified time (values between 150
+	 * and 500 ms look nice).
+	 * 
+	 * @param panel to replace the current panel
+	 * @param from side from where the new panel will slide in
+	 * @param animationTime time in ms for the slide animation to last
+	 * @return the panel that got replaced
+	 */
+	public JPanel switchPanel(JPanel panel, Side from, int animationTime) {
 		if (panel == null) {
 			throw new NullPointerException(
 					"Cannot switch Panel to null. Wanna try yourswitcher.remove(yourswitcher.getCurrentPanel()) instead?");
@@ -78,7 +123,7 @@ public class PanelSwitchingPanel extends JPanel {
 				panel.setLocation(0, getHeight());
 				break;
 			}
-			SwitchThread switcher = new SwitchThread(this, currentPanel, panel, speedInMs);
+			SwitchThread switcher = new SwitchThread(this, currentPanel, panel, animationTime);
 			switcher.start();
 		}
 		JPanel oldPanel = currentPanel;
@@ -86,6 +131,12 @@ public class PanelSwitchingPanel extends JPanel {
 		return oldPanel;
 	}
 	
+	/**
+	 * replaces the current panel with the specified one. No animation to be
+	 * shown when using this method, just straight replacing.
+	 * @param panel to replace the current one
+	 * @return the panel that got replaced
+	 */
 	public JPanel replacePanel(JPanel panel) {
 		if (panel == null) {
 			throw new NullPointerException(
@@ -102,6 +153,10 @@ public class PanelSwitchingPanel extends JPanel {
 		}
 	}
 	
+	/**
+	 * returns the JPanel that is currently displayed by this {@link PanelSwitchingPanel}
+	 * @return JPanel that is currently displayed.
+	 */
 	public JPanel getCurrentPanel(){
 		return this.currentPanel;
 	}
@@ -176,9 +231,10 @@ public class PanelSwitchingPanel extends JPanel {
 
 	/** does nothing */
 	@Override
-	public void setLayout(LayoutManager mgr) {
+	public final void setLayout(LayoutManager mgr) {
 		// do nothing
-		throw new UnsupportedOperationException("Cannot change Layout of a " + this.getClass().getCanonicalName() + ".");
+		if(!Thread.currentThread().getStackTrace()[2].getMethodName().contains("<init>"))
+			System.err.println("Cannot change Layout of a " + this.getClass().getCanonicalName() + ".");
 	}
 
 	/** does nothing */

@@ -65,7 +65,7 @@ public class TestFrame extends JFrame {
 					public void actionPerformed(ActionEvent e) {
 						JPanel panel = new JPanel();
 						panel.add(new JButton("" + Math.random()));
-						switchpanel.switchPanel(panel, switchpanel.LEFT, 350);
+						switchpanel.switchPanel(panel, switchpanel.LEFT, 150);
 					}
 					
 				};

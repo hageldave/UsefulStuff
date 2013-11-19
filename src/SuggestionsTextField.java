@@ -6,6 +6,14 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+/**
+ * JTextfield that is able to show suggustions based on the text in it.
+ * To provide those suggestions, the abstract method 
+ * {@link #gatherSuggestions(Object, TextfieldSuggester)}
+ * needs to be implemented.
+ * @author David Haegele
+ *
+ */
 public abstract class SuggestionsTextField extends JTextField {
 
 	public static void main(String[] args) {

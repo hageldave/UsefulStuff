@@ -249,6 +249,10 @@ public class PanelSwitchingPanel extends JPanel {
 		 * milliseconds to pass until parent gets repainted.
 		 * Determines the refreshrate (frames per second) of the animation 
 		 */
+		/** 
+		 * milliseconds to pass until parent gets repainted.
+		 * Determines the refreshrate (frames per second) of the animation 
+		 */
 		final int refreshCycleTime = 33; // = 30fps
 		
 		/**

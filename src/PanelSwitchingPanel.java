@@ -28,7 +28,7 @@ import javax.swing.JPanel;
 @SuppressWarnings("serial")
 public class PanelSwitchingPanel extends JPanel {
 	public static final Side LEFT = Side.left;
-	public static final Side RIGTH = Side.right;
+	public static final Side RIGHT = Side.right;
 	public static final Side TOP = Side.top;
 	public static final Side BOTTOM = Side.bottom;
 	
@@ -131,6 +131,51 @@ public class PanelSwitchingPanel extends JPanel {
 		return oldPanel;
 	}
 	
+	
+	public JPanel switchPanel(JPanel panel, Side from) {
+		return switchPanel(panel, from, getGoodAnimationTime(from));
+	}
+	
+	public JPanel switchPanelFast(JPanel panel, Side from) {
+		return switchPanel(panel, from, getFastAnimationTime(from));
+	}
+	
+	private int getFastAnimationTime(Side side){
+		if(side == Side.left || side == Side.right){
+			if(getWidth()>2700){
+				return 400;
+			} else {
+				double x = 115 * (Math.exp(0.000436*getWidth()));
+				return (int) Math.round(x);
+			}
+		} else {
+			if(getHeight()>2700){
+				return 400;
+			} else {
+				double x = 115 * (Math.exp(0.000436*getHeight()));
+				return (int) Math.round(x);
+			}
+		}
+	}
+	
+	private int getGoodAnimationTime(Side side){
+		if(side == Side.left || side == Side.right){
+			if(getWidth()>2700){
+				return 400;
+			} else {
+				double x =70+ 120 * (Math.exp(0.000436*getWidth()));
+				return (int) Math.round(x);
+			}
+		} else {
+			if(getHeight()>2700){
+				return 400;
+			} else {
+				double x =70+ 120 * (Math.exp(0.000436*getHeight()));
+				return (int) Math.round(x);
+			}
+		}
+	}
+	
 	/**
 	 * replaces the current panel with the specified one. No animation to be
 	 * shown when using this method, just straight replacing.
@@ -175,7 +220,7 @@ public class PanelSwitchingPanel extends JPanel {
 		JPanel panel1;
 		JPanel panel2;
 		int timeToComplete;
-		final int refreshCycleTime = 56; // = 18fps
+		final int refreshCycleTime = 33; // = 30fps
 		
 		public SwitchThread(PanelSwitchingPanel parent, JPanel panel1, JPanel panel2, int timeToComplete) {
 			this.parent = parent;

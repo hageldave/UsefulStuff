@@ -26,8 +26,8 @@ public abstract class SuggestionsTextField extends JTextField {
 		SuggestionsTextField textfield = new SuggestionsTextField() {
 
 			@Override
-			protected void gatherSuggestions(Object input, TextfieldSuggester suggester) {
-				suggester.sendSuggestionsToReceiver(input.toString().split(" "));
+			protected void gatherSuggestions(String input, TextfieldSuggester suggester) {
+				suggester.sendSuggestionsToReceiver(input.split(" "));
 			}
 		};
 		f.getContentPane().add(textfield, "topleft(0,0)bottomright(1.0,30)");
@@ -130,7 +130,7 @@ public abstract class SuggestionsTextField extends JTextField {
 	 * @param input the suggestions are based on.
 	 * @param suggester to send the resulting suggestions.
 	 */
-	protected abstract void gatherSuggestions(Object input, TextfieldSuggester suggester);
+	protected abstract void gatherSuggestions(String input, TextfieldSuggester suggester);
 
 	/** 
 	 * {@link SuggestionsProvider} implementation used by this 
@@ -145,7 +145,7 @@ public abstract class SuggestionsTextField extends JTextField {
 
 		@Override
 		public void makeSuggestions(Object input) {
-			getReceiver().gatherSuggestions(input, this);
+			getReceiver().gatherSuggestions((String)input, this);
 		}
 
 		@Override

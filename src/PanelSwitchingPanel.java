@@ -1,4 +1,18 @@
-
+/*
+ * PanelSwitchingPanel.java
+ *
+ * Copyright 2013 David Haegele
+ *
+ * This class is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This class is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
 
 import java.awt.Component;
 import java.awt.LayoutManager;
@@ -86,13 +100,13 @@ public class PanelSwitchingPanel extends JPanel {
 	 * The shown animation will last the specified time (values between 150
 	 * and 500 ms look nice).
 	 * 
-	 * @param panel to replace the current panel
+	 * @param newpanel to replace the current panel
 	 * @param from side from where the new panel will slide in
 	 * @param animationTime time in ms for the slide animation to last
 	 * @return the panel that got replaced
 	 */
-	public JPanel switchPanel(JPanel panel, Side from, int animationTime) {
-		if (panel == null) {
+	public JPanel switchPanel(JPanel newpanel, Side from, int animationTime) {
+		if (newpanel == null) {
 			throw new NullPointerException(
 					"Cannot switch Panel to null. Wanna try yourswitcher.remove(yourswitcher.getCurrentPanel()) instead?");
 		}
@@ -105,29 +119,29 @@ public class PanelSwitchingPanel extends JPanel {
 		this.isSwitching = true;
 		}
 
-		this._add(panel);
+		this._add(newpanel);
 		synchronized (this.getTreeLock()) {
-			panel.setSize(getSize());
-			panel.validate();
+			newpanel.setSize(getSize());
+			newpanel.validate();
 			switch (from) {
 			case left:
-				panel.setLocation(-getWidth(), 0);
+				newpanel.setLocation(-getWidth(), 0);
 				break;
 			case right:
-				panel.setLocation(getWidth(), 0);
+				newpanel.setLocation(getWidth(), 0);
 				break;
 			case top:
-				panel.setLocation(0, -getHeight());
+				newpanel.setLocation(0, -getHeight());
 				break;
 			default:
-				panel.setLocation(0, getHeight());
+				newpanel.setLocation(0, getHeight());
 				break;
 			}
-			SwitchThread switcher = new SwitchThread(this, currentPanel, panel, animationTime);
+			SwitchThread switcher = new SwitchThread(this, currentPanel, newpanel, animationTime);
 			switcher.start();
 		}
 		JPanel oldPanel = currentPanel;
-		currentPanel = panel;
+		currentPanel = newpanel;
 		return oldPanel;
 	}
 	
@@ -206,7 +220,11 @@ public class PanelSwitchingPanel extends JPanel {
 		return this.currentPanel;
 	}
 	
-	
+	/** 
+	 * enum for sides, used to specify the side where the new JPanel is slid
+	 * into, when using {@link PanelSwitchingPanel#switchPanel(JPanel, Side, int)}
+	 * @author David Haegele
+	 */
 	private static enum Side {
 		left,
 		right,
@@ -214,14 +232,32 @@ public class PanelSwitchingPanel extends JPanel {
 		bottom
 	}
 	
-	
+	/**
+	 * This thread is responsible for playing the switching animation.
+	 * @author David Haegele
+	 */
 	private static class SwitchThread extends Thread {
+		/** PanelSwitchingPanel on which the switching occurs */
 		PanelSwitchingPanel parent;
+		/** panel to be slid out and replaced */
 		JPanel panel1;
+		/** panel to be slid in, becoming the displayed panel of parent */
 		JPanel panel2;
+		/** time the animation will take to finish */
 		int timeToComplete;
+		/** 
+		 * milliseconds to pass until parent gets repainted.
+		 * Determines the refreshrate (frames per second) of the animation 
+		 */
 		final int refreshCycleTime = 33; // = 30fps
 		
+		/**
+		 * creates a new {@link SwitchThread}
+		 * @param parent on which the switching occurs
+		 * @param panel1 to be slid out and replaced
+		 * @param panel2 to be slid in, becoming the displayed panel of parent
+		 * @param timeToComplete time in ms the animation will take to finish
+		 */
 		public SwitchThread(PanelSwitchingPanel parent, JPanel panel1, JPanel panel2, int timeToComplete) {
 			this.parent = parent;
 			this.panel1 = panel1;
@@ -238,7 +274,9 @@ public class PanelSwitchingPanel extends JPanel {
 			float x2 = panel2.getX();
 			float y2 = panel2.getY();
 			
+			// distance to be covered per step in x direction
 			float stepX = (x1 - x2)/steps;
+			// distance to be covered per step in y direction
 			float stepY = (y1 - y2)/steps;
 			
 			long timer;
@@ -254,7 +292,7 @@ public class PanelSwitchingPanel extends JPanel {
 				panel2.setLocation((int)x2, (int)y2);
 				
 				parent.repaint();
-				// calc remaining sleep time to keep 18fps and store into timer
+				// calc remaining sleep time to keep up desired fps and store into timer
 				timer = refreshCycleTime-(System.currentTimeMillis()-timer);
 //				System.out.println(timer);
 				if(timer > -1){

@@ -20,19 +20,21 @@ import javax.swing.event.DocumentListener;
 @SuppressWarnings("serial")
 public abstract class SuggestionsTextField extends JTextField {
 
-	public static void main(String[] args) {
-		TestFrame f = new TestFrame();
-		f.getContentPane().setLayout(new PhotoCornersLayout());
-		SuggestionsTextField textfield = new SuggestionsTextField() {
-
-			@Override
-			protected void gatherSuggestions(String input, TextfieldSuggester suggester) {
-				suggester.sendSuggestionsToReceiver(input.split(" "));
-			}
-		};
-		f.getContentPane().add(textfield, "topleft(0,0)bottomright(1.0,30)");
-		f.setVisible(true);
-	}
+//	// Exapmle
+//	public static void main(String[] args) {
+//		TestFrame f = new TestFrame();
+//		f.getContentPane().setLayout(new PhotoCornersLayout());
+//		SuggestionsTextField textfield = new SuggestionsTextField() {
+//
+//			@Override
+//			protected void gatherSuggestions(String input, TextfieldSuggester suggester) {
+//				// suggests words contained in the input
+//				suggester.sendSuggestionsToReceiver(input.split(" "));
+//			}
+//		};
+//		f.getContentPane().add(textfield, "topleft(0,0)bottomright(1.0,30)");
+//		f.setVisible(true);
+//	}
 	
 	/** minimum number of suggestions to trigger popup list */
 	private int minimumSuggestions = 1;

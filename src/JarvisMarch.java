@@ -79,9 +79,9 @@ public class JarvisMarch {
 										point[1] - linePoint1[1]	};
 		
 		// making vec1 a unit vector
-		double x = vec1[0];
-		vec1[0] = vec1[0] / sqrt(x*x + vec1[1] * vec1[1]);
-		vec1[1] = vec1[1] / sqrt(x*x + vec1[1] * vec1[1]);
+		double var = sqrt(vec1[0]*vec1[0] + vec1[1]*vec1[1]);
+		vec1[0] = vec1[0] / var;
+		vec1[1] = vec1[1] / var;
 		
 		/* cause vec1 is now a unit vector (length = 1 = hypotenuse), sine 
 		 * and cosine of vec1's angle can be obtained as follows: 
@@ -106,9 +106,9 @@ public class JarvisMarch {
 		double det = (cos * cos) + (sin * sin); // or cos*cos - sin*-sin
 		
 		// rotating vec2 -> matrix * vec2
-		x = vec2[0];
-		vec2[0] =  cos/det * x	+ sin/det * vec2[1];
-		vec2[1] = -sin/det * x 	+ cos/det * vec2[1];
+		var = vec2[0];
+		vec2[0] =  cos/det * var	+ sin/det * vec2[1];
+		vec2[1] = -sin/det * var 	+ cos/det * vec2[1];
 		
 		/* now the line between linePoint1 and 2 is x-Axis.
 		 * if vec2 (vector from origin to point) points upwards,

@@ -1,6 +1,7 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
+
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.AbstractAction;
@@ -12,46 +13,60 @@ import javax.swing.event.DocumentListener;
 
 
 public class TextfieldEnhancer {
-	// Example
-	public static void main(String[] args) {
-		TestFrame frame = new TestFrame();
-		
-		JTextField verifiedTextfield = new JTextField();
-		Verifier dateVerifier = new Verifier() {
-			@Override
-			protected boolean verifyInput(String input) {
-				// checks if is date of format DD.MM.YY or DD.MM.YYYY
-				return input.matches("(([012]\\d)|(3[01]))\\.((0[1-9])|(1[012]))\\.(\\d{4}|\\d{2})");
-			}
-		};
-		TextfieldEnhancer.enhanceWithVerification(verifiedTextfield, dateVerifier);
-		
-		JTextField suggestionsTextfield = new JTextField();
-		Suggester wordSuggester = new Suggester() {
-			
-			@Override
-			public String[] gatherSuggestions(final String input) {
-				// suggests words contained in the input
-				String[] suggestions = input.split(" ");
-				return suggestions;
-			}
-		};
-		wordSuggester.setBackgroundTask(true);
-		TextfieldEnhancer.enhanceWithSuggestions(suggestionsTextfield, wordSuggester);
-		
-		frame.getContentPane().setLayout(new BorderLayout());
-		frame.getContentPane().add(verifiedTextfield, BorderLayout.NORTH);
-		frame.getContentPane().add(suggestionsTextfield, BorderLayout.SOUTH);
-		frame.setVisible(true);
-	}
+//	// Example
+//	public static void main(String[] args) {
+//		TestFrame frame = new TestFrame();
+//		
+//		JTextField verifiedTextfield = new JTextField();
+//		Verifier dateVerifier = new Verifier() {
+//			@Override
+//			protected boolean verifyInput(String input) {
+//				// checks if is date of format DD.MM.YY or DD.MM.YYYY
+//				return input.matches("(([012]\\d)|(3[01]))\\.((0[1-9])|(1[012]))\\.(\\d{4}|\\d{2})");
+//			}
+//		};
+//		TextfieldEnhancer.enhanceWithVerification(verifiedTextfield, dateVerifier);
+//		
+//		JTextField suggestionsTextfield = new JTextField();
+//		Suggester wordSuggester = new Suggester() {
+//			
+//			@Override
+//			public String[] gatherSuggestions(final String input) {
+//				// suggests words contained in the input
+//				String[] suggestions = input.split(" ");
+//				return suggestions;
+//			}
+//		};
+//		wordSuggester.setBackgroundTask(true);
+//		TextfieldEnhancer.enhanceWithSuggestions(suggestionsTextfield, wordSuggester);
+//		
+//		frame.getContentPane().setLayout(new BorderLayout());
+//		frame.getContentPane().add(verifiedTextfield, BorderLayout.NORTH);
+//		frame.getContentPane().add(suggestionsTextfield, BorderLayout.SOUTH);
+//		frame.setVisible(true);
+//	}
 	
-
+	/**
+	 * Enables the specified JTextfield to show suggestions based on its input.
+	 * <br>
+	 * The suggestions are provided by the specified {@link Suggester} which
+	 * generates them in its {@link Suggester#gatherSuggestions(String)}method.
+	 * <br>
+	 * The suggestions will be displayed via the Suggesters
+	 * {@link Suggester#displaySuggestions(String[])}method, which by default
+	 * displays a popup list below the textfield.
+	 * @param textfield to be enhanced with suggestions
+	 * @param suggester which provides the suggestions
+	 * @return the specified JTextField.
+	 */
 	public static JTextField enhanceWithSuggestions(final JTextField textfield, final Suggester suggester){
 		suggester.textfield = textfield;
-		textfield.getDocument().addDocumentListener(new TextfieldListener() {
+		// add a documentlistener that triggers the suggestion making process.
+		textfield.getDocument().addDocumentListener(new TextfieldListener(suggester.getID()) {
 			
 			@Override
 			public void documentChanged(DocumentEvent e) {
+				// when suggester is a backgroundtask -> execute in a SwingWorker
 				if(suggester.isBackgroundTask()){
 					SwingWorker<String[], Void> backgroundtask = new SwingWorker<String[], Void>(){
 						@Override
@@ -61,7 +76,7 @@ public class TextfieldEnhancer {
 						@Override
 						protected void done() {
 							try {
-								suggester.displaySuggestions(get());
+								suggester.displaySuggestions(textfield, get());
 							} catch (InterruptedException | ExecutionException e) {
 								e.printStackTrace();
 							}
@@ -69,15 +84,24 @@ public class TextfieldEnhancer {
 					};
 					backgroundtask.execute();
 				} else {
-					suggester.displaySuggestions(suggester.gatherSuggestions(textfield.getText()));
+					suggester.displaySuggestions(textfield, suggester.gatherSuggestions(textfield.getText()));
 				}
 			}
 		});
 		return textfield;
 	}
 	
+	/**
+	 * Enables the specified JTextField to verify its input directly.
+	 * <br>
+	 * The verification of the input is done by the specified {@link Verifier}.
+	 * <b
+	 * @param textfield
+	 * @param verifier
+	 * @return
+	 */
 	public static JTextField enhanceWithVerification(final JTextField textfield, final Verifier verifier){
-		textfield.getDocument().addDocumentListener(new TextfieldListener() {
+		textfield.getDocument().addDocumentListener(new TextfieldListener(verifier.getID()) {
 			
 			@Override
 			public void documentChanged(DocumentEvent e) {
@@ -92,11 +116,7 @@ public class TextfieldEnhancer {
 						protected void done() {
 							try {
 								boolean isvalid = get();
-								if(isvalid){
-									textfield.setBackground(verifier.getColorValid());
-								} else {
-									textfield.setBackground(verifier.getColorInvalid());
-								}
+								verifier.showVerification(textfield, isvalid);
 							} catch (InterruptedException | ExecutionException e) {
 								e.printStackTrace();
 							}
@@ -104,11 +124,7 @@ public class TextfieldEnhancer {
 					};
 					backgroundtask.execute();
 				} else {
-					if (verifier.verifyInput(textfield.getText()) == true) {
-						textfield.setBackground(verifier.getColorValid());
-					} else {
-						textfield.setBackground(verifier.getColorInvalid());
-					}
+					verifier.showVerification(textfield, verifier.verifyInput(textfield.getText()));
 				}
 			}
 		});
@@ -116,17 +132,59 @@ public class TextfieldEnhancer {
 	}
 	
 	
+	public static void removeSuggester(JTextField textfield, Suggester suggester){
+		textfield.getDocument().removeDocumentListener(new TextfieldListener(suggester.getID()) {
+			@Override
+			public void documentChanged(DocumentEvent e) {}
+		});
+	}
 	
-	public static abstract class Suggester {
-		protected JTextField textfield = null;
+	
+	public static void removeVerifier(JTextField textfield, Verifier verifier){
+		textfield.getDocument().removeDocumentListener(new TextfieldListener(verifier.getID()) {
+			@Override
+			public void documentChanged(DocumentEvent e) {}
+		});
+	}
+	
+	
+	protected static abstract class Enhancement {
+		private static int CURRENT_ID = 0;
+		private String id;
+		
+		
+		public Enhancement() {
+			id=getIdPrefix()+getNewID();
+		}
+		
+		public String getID() {
+			return id;
+		}
+		
+		protected abstract String getIdPrefix();
+		
+		private static synchronized int getNewID(){
+			CURRENT_ID++;
+			return CURRENT_ID;
+		}
+	}
+	
+	
+	public static abstract class Suggester extends Enhancement{
+		protected JTextField textfield = null; // TODO: textfield unabhängigkeit...
 		
 		/** minimum number of suggestions to trigger popup list */
 		protected int minimumSuggestions = 1;
 		/** maximum number of suggestions to trigger popup list */
 		protected int maximumSuggestions = 10;
 		
-		protected boolean isBackgroundTask = false;
+		protected boolean isBackgroundTask = false;	
 		
+		
+		@Override
+		protected String getIdPrefix() {
+			return "suggester";
+		}
 		
 		public boolean isBackgroundTask() {
 			return isBackgroundTask;
@@ -136,7 +194,7 @@ public class TextfieldEnhancer {
 			this.isBackgroundTask = isBackgroundTask;
 		}
 
-		public void displaySuggestions(String[] suggestions){
+		public void displaySuggestions(final JTextField textfield, String[] suggestions){
 			if(textfield != null){
 				if (suggestions.length <= maximumSuggestions
 						&& suggestions.length >= minimumSuggestions) {
@@ -205,13 +263,17 @@ public class TextfieldEnhancer {
 	}
 	
 	
-	public static abstract class Verifier {
-		
+	public static abstract class Verifier extends Enhancement{
 		protected Color colorInvalid = Color.decode("#FF520F");
 		protected Color colorValid = Color.decode("#BAFFBA");
 		
-		protected boolean isBackgroundTask = false;
+		protected boolean isBackgroundTask = false;	
 		
+		
+		@Override
+		protected String getIdPrefix() {
+			return "verifier";
+		}
 		
 		public boolean isBackgroundTask() {
 			return isBackgroundTask;
@@ -236,6 +298,14 @@ public class TextfieldEnhancer {
 		public void setColorValid(Color colorValid) {
 			this.colorValid = colorValid;
 		}
+		
+		public void showVerification(JTextField textfield, boolean isValid){
+			if(isValid){
+				textfield.setBackground(getColorValid());
+			} else {
+				textfield.setBackground(getColorInvalid());
+			}
+		}
 
 		protected abstract boolean verifyInput(String input);
 
@@ -243,6 +313,16 @@ public class TextfieldEnhancer {
 	
 	
 	private static abstract class TextfieldListener implements DocumentListener {
+		private String ID;
+		
+		public TextfieldListener(String id) {
+			ID = id;
+		}
+		
+		public String getID() {
+			return ID;
+		}
+		
 		@Override
 		public void changedUpdate(DocumentEvent e) {
 			documentChanged(e);
@@ -257,6 +337,15 @@ public class TextfieldEnhancer {
 		}
 		
 		public abstract void documentChanged(DocumentEvent e);
+		
+		@Override
+		public boolean equals(Object obj) {
+			if(obj != null && obj instanceof TextfieldListener){
+				return ((TextfieldListener)obj).ID.equals(ID);
+			} else {
+				return false;
+			}
+		}
 		
 	}
 	

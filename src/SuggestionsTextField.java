@@ -29,6 +29,7 @@ import javax.swing.event.DocumentListener;
  * 
  * @author David Haegele
  * @version 1.1
+ * @deprecated since 23.11.2013 - replaced by TextfieldEnhancer
  *
  */
 @SuppressWarnings("serial")

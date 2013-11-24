@@ -225,13 +225,36 @@ public class TextfieldEnhancer {
 		}
 	}
 	
-	//TODO javadoc
+	/**
+	 * This abstract class implements the suggestion {@link Enhancement}.
+	 * A Suggester is applied to a JTextfield with the
+	 * {@link TextfieldEnhancer#enhanceWithSuggestions(JTextField, Suggester)}
+	 * method.
+	 * <br>
+	 * The suggestions are based on input and provided by it's 
+	 * {@link Suggester#gatherSuggestions(String)}method, which is abstract
+	 * and needs to be implemented. 
+	 * <br>
+	 * The resulting suggestions are displayed via the suggesters
+	 * {@link Suggester#displaySuggestions(JTextField, String[])}method, which
+	 * by default shows a popup list below the enhanced textfield.
+	 * <br>
+	 * When suggestion gathering is likely to be time-consuming, you should
+	 * set this Suggester to be executed in background, to not block the GUI
+	 * when gathering. Use {@link Suggester#setBackgroundTask(boolean)}
+	 * to do so.
+	 * @author David Haegele
+	 * @version 1.0
+	 */
 	public static abstract class Suggester extends Enhancement {
 		/** minimum number of suggestions to trigger popup list */
 		protected int minimumSuggestions = 1;
 		/** maximum number of suggestions to trigger popup list */
 		protected int maximumSuggestions = 10;
 		
+		/** when true, {@link #gatherSuggestions(String)} is executed in
+		 * a {@link SwingWorker} 
+		 */
 		protected boolean isBackgroundTask = false;	
 		
 		
@@ -240,10 +263,23 @@ public class TextfieldEnhancer {
 			return "suggester";
 		}
 		
+		/**
+		 * Returns true if this suggester is executed in background.
+		 * Recommended for time-consuming suggestion gathering. <br>
+		 * Use {@link #setBackgroundTask(boolean)} to change.
+		 * @return true if suggester is executed in background
+		 */
 		public boolean isBackgroundTask() {
 			return isBackgroundTask;
 		}
 
+		/**
+		 * Sets if this Suggester is to be executed in a background
+		 * thread or not. <br>
+		 * When suggestion gathering is time-consuming this should be done.
+		 * @param isBackgroundTask true when execution of suggestion gathering
+		 * shall be done in a background thread
+		 */
 		public void setBackgroundTask(boolean isBackgroundTask) {
 			this.isBackgroundTask = isBackgroundTask;
 		}
@@ -284,12 +320,27 @@ public class TextfieldEnhancer {
 			this.maximumSuggestions = maximum;
 		}
 
+		/**
+		 * (Is called automatically when Suggester is applied to a JTextfield via
+		 * {@link TextfieldEnhancer#enhanceWithSuggestions(JTextField, Suggester)})
+		 * <br><p>
+		 * Displays specified suggestions for the specified textfield.
+		 * The suggestions are shown in a {@link JPopupMenu} under the
+		 * textfield. <br>
+		 * The suggestions are only shown if the number of suggestions is
+		 * between minimumSuggestions and maximumSuggestions
+		 * (use {@link #setMinimumSuggestions(int)} and 
+		 * {@link #setMaximumSuggestions(int)} to change).
+		 * @param textfield for which the suggestions are shown
+		 * @param suggestions that are shown.
+		 */
 		public void displaySuggestions(final JTextField textfield, String[] suggestions){
 			if(textfield != null){
 				if (suggestions.length <= maximumSuggestions
 						&& suggestions.length >= minimumSuggestions) {
 					JPopupMenu popup = new JPopupMenu();
 					for (final String text : suggestions) {
+						@SuppressWarnings("serial")
 						AbstractAction action = new AbstractAction(text) {
 		
 							@Override
@@ -308,6 +359,9 @@ public class TextfieldEnhancer {
 		}
 
 		/**
+		 * (Is called automatically when Suggester is applied to a JTextfield via
+		 * {@link TextfieldEnhancer#enhanceWithSuggestions(JTextField, Suggester)})
+		 * <br><p>
 		 * Gathers suggestions for the specified input.
 		 * @param input the suggestions are based on
 		 * @return gathered suggestions in a String[]
@@ -316,11 +370,37 @@ public class TextfieldEnhancer {
 		
 	}
 	
-	//TODO javadoc
+	/**
+	 * This abstract class implements the verification {@link Enhancement}.
+	 * A Verifier is applied to a JTextfield with the
+	 * {@link TextfieldEnhancer#enhanceWithVerification(JTextField, Verifier)}
+	 * method.
+	 * <br>
+	 * The verification is done by it's 
+	 * {@link Verifier#verifyInput(String)}method, which is abstract and needs
+	 * to be implemented. 
+	 * <br>
+	 * The result of the verification is displayed via the verifiers
+	 * {@link Verifier#displayVerification(JTextField, boolean)}method, which
+	 * by default paints the textfields background red if input is invalid 
+	 * and green if valid.
+	 * <br>
+	 * When the verification process is likely to be time-consuming,
+	 * you should set this verifier to be executed in background, to not block
+	 * the GUI when verifying. Use {@link Verifier#setBackgroundTask(boolean)}
+	 * to do so.
+	 * @author David Haegele
+	 * @version 1.0
+	 */
 	public static abstract class Verifier extends Enhancement {
+		/** background color for textfield if input is invalid */
 		protected Color colorInvalid = Color.decode("#FF520F");
+		/** background color for textfield if input is valid */
 		protected Color colorValid = Color.decode("#BAFFBA");
 		
+		/** when true, {@link #verifyInput(String)} is executed in
+		 * a {@link SwingWorker} 
+		 */
 		protected boolean isBackgroundTask = false;	
 		
 		
@@ -329,30 +409,67 @@ public class TextfieldEnhancer {
 			return "verifier";
 		}
 		
+		/**
+		 * Returns true if this verifier is executed in background.
+		 * Recommended for time-consuming verifications. <br>
+		 * Use {@link #setBackgroundTask(boolean)} to change.
+		 * @return true if verifier is executed in background
+		 */
 		public boolean isBackgroundTask() {
 			return isBackgroundTask;
 		}
 
+		/**
+		 * Sets if this Verifier is to be executed in a background
+		 * thread or not. <br>
+		 * When verification is time-consuming this should be done.
+		 * @param isBackgroundTask true when execution of verification
+		 * shall be done in a background thread
+		 */
 		public void setBackgroundTask(boolean isBackgroundTask) {
 			this.isBackgroundTask = isBackgroundTask;
 		}
 		
+		/**
+		 * @return background color of textfield for invalid inputs
+		 */
 		public Color getColorInvalid() {
 			return colorInvalid;
 		}
 
+		/**
+		 * Sets the color of textfield for invalid input.
+		 * @param colorInvalid for invalid input
+		 */
 		public void setColorInvalid(Color colorInvalid) {
 			this.colorInvalid = colorInvalid;
 		}
 
+		/**
+		 * @return background color of textfield for valid inputs
+		 */
 		public Color getColorValid() {
 			return colorValid;
 		}
 
+		/**
+		 * Sets the color of textfield for valid input.
+		 * @param colorValid for valid input
+		 */
 		public void setColorValid(Color colorValid) {
 			this.colorValid = colorValid;
 		}
 		
+		/**
+		 * (Is called automatically when Verifier is applied to a JTextfield via
+		 * {@link TextfieldEnhancer#enhanceWithVerification(JTextField, Verifier)})
+		 * <br><p>
+		 * Displays the result of input verification of the specified textfield
+		 * to the user. When input is valid, specified textfields background is
+		 * set to green, to red when invalid.
+		 * @param textfield to change background color depending on isValid
+		 * @param isValid true when input is valid
+		 */
 		public void displayVerification(JTextField textfield, boolean isValid){
 			if(isValid){
 				textfield.setBackground(getColorValid());
@@ -360,15 +477,47 @@ public class TextfieldEnhancer {
 				textfield.setBackground(getColorInvalid());
 			}
 		}
-
+		
+		/**
+		 * (Is called automatically when Verifier is applied to a JTextfield via
+		 * {@link TextfieldEnhancer#enhanceWithVerification(JTextField, Verifier)})
+		 * <br><p>
+		 * Verifies the specified input. When input is valid returns
+		 * true, when invalid false.
+		 * @param input
+		 * @return true when input is valid, else false
+		 */
 		public abstract boolean verifyInput(String input);
 
 	}
 	
-	//TODO javadoc
+	/**
+	 * Documentlistener that points all update methods (changedUpdate,
+	 * insertUpdate, removeUpdate) to the abstract method
+	 * {@link TextfieldListener#documentChanged(DocumentEvent)}.
+	 * <br>
+	 * It is used in the 
+	 * {@link TextfieldEnhancer#enhanceWithSuggestions(JTextField, Suggester)}
+	 * method and similar enhanceWith methods as trigger for the enhancing
+	 * actions. 
+	 * <br>
+	 * It has an ID so it can be identified. The ID should match the
+	 * {@link Enhancement}s ID for which it's been created. This way it
+	 * can later be removed from the document when calling
+	 * {@link TextfieldEnhancer#removeSuggester(JTextField, Suggester)}
+	 * or any similar remove method.
+	 * @author David Haegele
+	 * @version 1.0
+	 */
 	private static abstract class TextfieldListener implements DocumentListener {
+		/** should match a {@link Enhancement}s ID */
 		private String ID;
 		
+		/**
+		 * creates new Textfieldlistener that will be used to trigger
+		 * an {@link Enhancement}
+		 * @param id same ID as {@link Enhancement} that it triggers.
+		 */
 		public TextfieldListener(String id) {
 			ID = id;
 		}
@@ -395,7 +544,7 @@ public class TextfieldEnhancer {
 		@Override
 		public boolean equals(Object obj) {
 			if(obj != null && obj instanceof TextfieldListener){
-				return ((TextfieldListener)obj).ID.equals(ID);
+				return ((TextfieldListener)obj).getID().equals(ID);
 			} else {
 				return false;
 			}

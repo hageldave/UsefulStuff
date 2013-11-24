@@ -28,38 +28,38 @@ import javax.swing.event.DocumentListener;
  *
  */
 public class TextfieldEnhancer {
-	// Example
-	public static void main(String[] args) {
-		TestFrame frame = new TestFrame();
-		
-		JTextField verifiedTextfield = new JTextField();
-		Verifier dateVerifier = new Verifier() {
-			@Override
-			public boolean verifyInput(String input) {
-				// checks if is date of format DD.MM.YY or DD.MM.YYYY
-				return input.matches("(([012]\\d)|(3[01]))\\.((0[1-9])|(1[012]))\\.(\\d{4}|\\d{2})");
-			}
-		};
-		TextfieldEnhancer.enhanceWithVerification(verifiedTextfield, dateVerifier);
-		
-		JTextField suggestionsTextfield = new JTextField();
-		Suggester wordSuggester = new Suggester() {
-			
-			@Override
-			public String[] gatherSuggestions(final String input) {
-				// suggests words contained in the input
-				String[] suggestions = input.split(" ");
-				return suggestions;
-			}
-		};
-		wordSuggester.setBackgroundTask(true);
-		TextfieldEnhancer.enhanceWithSuggestions(suggestionsTextfield, wordSuggester);
-		
-		frame.getContentPane().setLayout(new java.awt.BorderLayout());
-		frame.getContentPane().add(verifiedTextfield, java.awt.BorderLayout.NORTH);
-		frame.getContentPane().add(suggestionsTextfield, java.awt.BorderLayout.SOUTH);
-		frame.setVisible(true);
-	}
+//	// Example
+//	public static void main(String[] args) {
+//		TestFrame frame = new TestFrame();
+//		
+//		JTextField verifiedTextfield = new JTextField();
+//		Verifier dateVerifier = new Verifier() {
+//			@Override
+//			public boolean verifyInput(String input) {
+//				// checks if is date of format DD.MM.YY or DD.MM.YYYY
+//				return input.matches("(([012]\\d)|(3[01]))\\.((0[1-9])|(1[012]))\\.(\\d{4}|\\d{2})");
+//			}
+//		};
+//		TextfieldEnhancer.enhanceWithVerification(verifiedTextfield, dateVerifier);
+//		
+//		JTextField suggestionsTextfield = new JTextField();
+//		Suggester wordSuggester = new Suggester() {
+//			
+//			@Override
+//			public String[] gatherSuggestions(final String input) {
+//				// suggests words contained in the input
+//				String[] suggestions = input.split(" ");
+//				return suggestions;
+//			}
+//		};
+//		wordSuggester.setBackgroundTask(true);
+//		TextfieldEnhancer.enhanceWithSuggestions(suggestionsTextfield, wordSuggester);
+//		
+//		frame.getContentPane().setLayout(new java.awt.BorderLayout());
+//		frame.getContentPane().add(verifiedTextfield, java.awt.BorderLayout.NORTH);
+//		frame.getContentPane().add(suggestionsTextfield, java.awt.BorderLayout.SOUTH);
+//		frame.setVisible(true);
+//	}
 	
 	/**
 	 * Enables the specified JTextfield to show suggestions based on its input.

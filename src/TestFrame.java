@@ -25,7 +25,7 @@ public class TestFrame extends JFrame {
 	public TestFrame() {
 		super();
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
-		this.setSize(1502, 350);
+		this.setSize(1200, 350);
 	}
 	
 	

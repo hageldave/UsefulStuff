@@ -21,6 +21,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
 import javax.swing.JPanel;
+import javax.swing.SwingWorker;
 
 /**
  * This JPanel is a container for another JPanel. It can be used to create some
@@ -93,9 +94,9 @@ public class PanelSwitchingPanel extends JPanel {
 	
 	/**
 	 * switches the currently displayed JPanel with the specified one.
-	 * This {@link PanelSwitchingPanel} will perform that showing a sliding
-	 * animation where the old panel slides out and the new one in. The new
-	 * panel will slide in from the specified side (use one of
+	 * This {@link PanelSwitchingPanel} will perform that while showing a 
+	 * sliding animation where the old panel slides out and the new one in. 
+	 * The new panel will slide in from the specified side (use one of
 	 * {@link PanelSwitchingPanel#TOP},{@link #LEFT},{@link #RIGTH},{@link #BOTTOM})
 	 * The shown animation will last the specified time (values between 150
 	 * and 500 ms look nice).
@@ -138,23 +139,50 @@ public class PanelSwitchingPanel extends JPanel {
 				break;
 			}
 			SwitchThread switcher = new SwitchThread(this, currentPanel, newpanel, animationTime);
-			switcher.start();
+			switcher.execute();
 		}
 		JPanel oldPanel = currentPanel;
 		currentPanel = newpanel;
 		return oldPanel;
 	}
 	
-	
+	/**
+	 * switches the currently displayed JPanel with the specified one.
+	 * This {@link PanelSwitchingPanel} will perform that while showing a 
+	 * sliding animation where the old panel slides out and the new one in. 
+	 * The new panel will slide in from the specified side (use one of
+	 * {@link PanelSwitchingPanel#TOP},{@link #LEFT},{@link #RIGTH},{@link #BOTTOM})
+	 * The animation will be calculated depending on the size of this
+	 * PanelSwitchingPanel.
+	 * 
+	 * @param newpanel to replace the current panel
+	 * @param from side from where the new panel will slide in
+	 * @return the panel that got replaced
+	 */
 	public JPanel switchPanel(JPanel panel, Side from) {
 		return switchPanel(panel, from, getGoodAnimationTime(from));
 	}
 	
+	/**
+	 * switches the currently displayed JPanel with the specified one.
+	 * This {@link PanelSwitchingPanel} will perform that while showing a 
+	 * sliding animation where the old panel slides out and the new one in. 
+	 * The new panel will slide in from the specified side (use one of
+	 * {@link PanelSwitchingPanel#TOP},{@link #LEFT},{@link #RIGTH},{@link #BOTTOM})
+	 * The animation will be calculated depending on the size of this
+	 * PanelSwitchingPanel. 
+	 * A shorter time than for {@link #switchPanel(JPanel, Side)} will 
+	 * be calculated.
+	 * 
+	 * @param newpanel to replace the current panel
+	 * @param from side from where the new panel will slide in
+	 * @return the panel that got replaced
+	 */
 	public JPanel switchPanelFast(JPanel panel, Side from) {
-		return switchPanel(panel, from, getFastAnimationTime(from));
+		return switchPanel(panel, from, getShortAnimationTime(from));
 	}
 	
-	private int getFastAnimationTime(Side side){
+	private int getShortAnimationTime(Side side){
 		if(side == Side.left || side == Side.right){
 			if(getWidth()>2700){
 				return 400;
@@ -236,7 +264,7 @@ public class PanelSwitchingPanel extends JPanel {
 	 * This thread is responsible for playing the switching animation.
 	 * @author David Haegele
 	 */
-	private static class SwitchThread extends Thread {
+	private static class SwitchThread extends SwingWorker<Void, Void> {
 		/** PanelSwitchingPanel on which the switching occurs */
 		PanelSwitchingPanel parent;
 		/** panel to be slid out and replaced */
@@ -270,7 +298,7 @@ public class PanelSwitchingPanel extends JPanel {
 		}
 		
 		@Override
-		public void run() {
+		public Void doInBackground() {
 			int steps = timeToComplete/refreshCycleTime;
 			
 			float x1 = panel1.getX();
@@ -296,9 +324,8 @@ public class PanelSwitchingPanel extends JPanel {
 				panel2.setLocation((int)x2, (int)y2);
 				
 				parent.repaint();
-				// calc remaining sleep time to keep up desired fps and store into timer
+				// calc remaining sleep time to keep up desired fps and store into 'timer'
 				timer = refreshCycleTime-(System.currentTimeMillis()-timer);
-//				System.out.println(timer);
 				if(timer > -1){
 					try {
 						Thread.sleep(timer);
@@ -307,9 +334,15 @@ public class PanelSwitchingPanel extends JPanel {
 					}
 				}
 			}
+			return null;
+		}
+		
+		@Override
+		protected void done() {
 			parent.remove(panel1);
 			parent.isSwitching = false;
 			panel2.setLocation(0, 0);
+			panel2.setSize(parent.getSize());
 			parent.validate();
 			parent.repaint();
 		}

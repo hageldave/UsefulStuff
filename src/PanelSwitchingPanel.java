@@ -47,7 +47,7 @@ import javax.swing.SwingWorker;
  * that, so display wont get messed up.
  * 
  * @author David Haegele
- * @version 1.1 - 26.11.13
+ * @version 1.2 - 27.11.13
  */
 @SuppressWarnings("serial")
 public class PanelSwitchingPanel extends JPanel {

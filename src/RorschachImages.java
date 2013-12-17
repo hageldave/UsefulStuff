@@ -23,20 +23,12 @@
  * THE SOFTWARE.
  */
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.util.Random;
-
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JSlider;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 /**
  * Class that provides a method for creating pseudo random images.
@@ -48,7 +40,7 @@ import javax.swing.event.ChangeListener;
  * image everytime when beeing fed same parameters.
  * 
  * @author David Haegele
- * @version 1.0 - 17.12.13
+ * @version 1.1 - 17.12.13
  * 
  */
 public class RorschachImages {
@@ -64,10 +56,23 @@ public class RorschachImages {
 	 * @param hash value from which the algorithm generates pixels
 	 * @return pseude random rorschach image
 	 */
-	public static BufferedImage getRorschachImage(int halfwidth, int height, int hash){
+	static BufferedImage getRorschachImage(int halfwidth, int height, int hash){
 		Random r = new Random(hash);
 		Color bg = new Color(r.nextInt());
 		Color fg = new Color(r.nextInt());
+		
+		// make bg darker
+		int rBG = bg.getRed() -80; 		rBG = rBG < 0 ? 0:rBG;
+		int gBG = bg.getGreen() -80; 	gBG = gBG < 0 ? 0:gBG;
+		int bBG = bg.getBlue() -80; 	bBG = bBG < 0 ? 0:bBG;
+		bg = new Color(rBG, gBG, bBG);
+		
+		// make fg brighter
+		int rFG = fg.getRed() +80; 		rFG = rFG > 255 ? 255: rFG;
+		int gFG = fg.getGreen() +80; 	gFG = gFG > 255 ? 255: gFG;
+		int bFG = fg.getBlue() +80; 	bFG = bFG > 255 ? 255: bFG;
+		fg = new Color(rFG, gFG, bFG);
+		
 		return getRorschachImage(halfwidth, height, hash, bg, fg);
 	}
 	
@@ -112,7 +117,7 @@ public class RorschachImages {
 	public static Image getScaledImage(Image srcImg, int width, int height){
 	    BufferedImage resizedImg = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
 	    Graphics2D g2 = resizedImg.createGraphics();
-//	    g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+	    g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
 	    g2.drawImage(srcImg, 0, 0, width, height, null);
 	    g2.dispose();
 	    return resizedImg;
@@ -120,22 +125,28 @@ public class RorschachImages {
 	
 	/** Interactive Example */
 	public static void main(String[] args) {
-		JFrame frame = new JFrame();
+		javax.swing.JFrame frame = new javax.swing.JFrame();
 		frame.setSize(400, 400);
-		frame.setDefaultCloseOperation(frame.EXIT_ON_CLOSE);
-		int hashvalue = 45;
-		final JLabel label = new JLabel(new ImageIcon(getScaledImage(getRorschachImage(6, 12, hashvalue), 200, 200)));
-		final JSlider slider = new JSlider(20, 520, 20);
-		slider.addChangeListener(new ChangeListener() {
-			
+		frame.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
+		final javax.swing.JLabel label = new javax.swing.JLabel(new javax.swing.ImageIcon(getScaledImage(getRorschachImage(4, 8, 20), 200, 200)));
+		final javax.swing.JSlider hashslider = new javax.swing.JSlider(0, 1024, 20);
+		final javax.swing.JSlider sizeslider = new javax.swing.JSlider(javax.swing.JSlider.VERTICAL, 2, 15, 4);
+		javax.swing.event.ChangeListener changelistenr = new javax.swing.event.ChangeListener() {
 			@Override
-			public void stateChanged(ChangeEvent arg0) {
-				label.setIcon(new ImageIcon(getScaledImage(getRorschachImage(6, 12, slider.getValue()), 200, 200)));
+			public void stateChanged(javax.swing.event.ChangeEvent arg0) {
+				int hash = hashslider.getValue();
+				int halfwidth = sizeslider.getValue();
+				int height = 2*halfwidth;
+				label.setIcon(new javax.swing.ImageIcon(getScaledImage(getRorschachImage(halfwidth, height, hash), 200, 200)));
 			}
-		});
-		frame.getContentPane().setLayout(new BorderLayout());
-		frame.getContentPane().add(label, BorderLayout.CENTER);
-		frame.getContentPane().add(slider, BorderLayout.SOUTH);
+		};
+		hashslider.addChangeListener(changelistenr);
+		sizeslider.addChangeListener(changelistenr);
+		
+		frame.getContentPane().setLayout(new java.awt.BorderLayout());
+		frame.getContentPane().add(label, java.awt.BorderLayout.CENTER);
+		frame.getContentPane().add(hashslider, java.awt.BorderLayout.SOUTH);
+		frame.getContentPane().add(sizeslider, java.awt.BorderLayout.EAST);
 		frame.setVisible(true);
 	}
 }

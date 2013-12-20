@@ -22,7 +22,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -321,7 +320,6 @@ public class PhotoCornersLayout implements LayoutManager2 {
 				float mW = minDim.width;
 				float mH = minDim.height;
 				Constraint c = this.constraintsMap.get(comp);
-				
 				// WIDTH
 				if(c.isRelativeXL){
 					if(c.isRelativeXR){
@@ -360,9 +358,9 @@ public class PhotoCornersLayout implements LayoutManager2 {
 						if(c.isLeftAnchored && c.isRightAnchored){
 							mW = minDim.width + c.xL + c.xR;
 						} else if(c.isLeftAnchored && !c.isRightAnchored){
-							// nicht zu verwenden
+							mW = c.xR;
 						} else if(!c.isLeftAnchored && c.isRightAnchored){
-							// nicht zu verwenden
+							mW = c.xL;
 						} else {
 							// nicht zu verwenden
 						}
@@ -409,9 +407,9 @@ public class PhotoCornersLayout implements LayoutManager2 {
 						if(c.isTopAnchored && c.isBottomAnchored){
 							mH = minDim.height + c.yT + c.yB;
 						} else if(c.isTopAnchored && !c.isBottomAnchored){
-							// nicht zu verwenden
+							mH = c.yB;
 						} else if(!c.isTopAnchored && c.isBottomAnchored){
-							// nicht zu verwenden
+							mH = c.yT;
 						} else {
 							// nicht zu verwenden
 						}
@@ -438,7 +436,6 @@ public class PhotoCornersLayout implements LayoutManager2 {
 				float mW = prefDim.width;
 				float mH = prefDim.height;
 				Constraint c = this.constraintsMap.get(comp);
-				
 				// WIDTH
 				if(c.isRelativeXL){
 					if(c.isRelativeXR){
@@ -477,9 +474,9 @@ public class PhotoCornersLayout implements LayoutManager2 {
 						if(c.isLeftAnchored && c.isRightAnchored){
 							mW = prefDim.width + c.xL + c.xR;
 						} else if(c.isLeftAnchored && !c.isRightAnchored){
-							// nicht zu verwenden
+							mW = c.xR;
 						} else if(!c.isLeftAnchored && c.isRightAnchored){
-							// nicht zu verwenden
+							mW = c.xL;
 						} else {
 							// nicht zu verwenden
 						}
@@ -526,9 +523,9 @@ public class PhotoCornersLayout implements LayoutManager2 {
 						if(c.isTopAnchored && c.isBottomAnchored){
 							mH = prefDim.height + c.yT + c.yB;
 						} else if(c.isTopAnchored && !c.isBottomAnchored){
-							// nicht zu verwenden
+							mH = c.yB;
 						} else if(!c.isTopAnchored && c.isBottomAnchored){
-							// nicht zu verwenden
+							mH = c.yT;
 						} else {
 							// nicht zu verwenden
 						}

@@ -103,7 +103,7 @@ import java.util.Map;
  * side.
  * 
  * @author David Haegele
- * @version 1.1 - 26.11.13
+ * @version 1.2 - 23.12.13
  *
  */
 public class PhotoCornersLayout implements LayoutManager2 {

@@ -1,3 +1,4 @@
+
 /* PanelSwitchingPanel.java
  * 
  * Copyright (c) 2013 David Haegele
@@ -47,7 +48,7 @@ import javax.swing.SwingWorker;
  * that, so display wont get messed up.
  * 
  * @author David Haegele
- * @version 1.2 - 27.11.13
+ * @version 1.2.1 - 06.01.2014
  */
 @SuppressWarnings("serial")
 public class PanelSwitchingPanel extends JPanel {
@@ -119,6 +120,10 @@ public class PanelSwitchingPanel extends JPanel {
 		if (newpanel == null) {
 			throw new NullPointerException(
 					"Cannot switch Panel to null. Wanna try yourswitcher.remove(yourswitcher.getCurrentPanel()) instead?");
+		}
+		
+		if(newpanel == currentPanel){
+			return replacePanel(newpanel);
 		}
 		
 		// if another switchPanel operation is in progress, wait until it has finished
@@ -352,7 +357,7 @@ public class PanelSwitchingPanel extends JPanel {
 			parent.isSwitching = false;
 			panel2.setLocation(0, 0);
 			panel2.setSize(parent.getSize());
-			parent.validate();
+			parent.revalidate();
 			parent.repaint();
 		}
 	}

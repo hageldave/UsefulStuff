@@ -1,7 +1,6 @@
-
 /* PanelSwitchingPanel.java
  * 
- * Copyright (c) 2013 David Haegele
+ * Copyright (c) 2015 David Haegele
  *
  * (MIT License)
  *
@@ -25,11 +24,15 @@
  */
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.LayoutManager;
 import java.awt.PopupMenu;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
+import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 
@@ -45,13 +48,13 @@ import javax.swing.SwingWorker;
  * The displayed JPanel will be displayed within the bounds of this 
  * PanelSwitchingPanel at the same size. So if you want to change the size or
  * location  of the displayed JPanel, use the PanelSwitchingPanels methods for
- * that, so display wont get messed up.
+ * that, so display wont lock input for component get messed up.
  * 
  * @author David Haegele
- * @version 1.2.1 - 06.01.2014
+ * @version 1.2.2 - 06.08.2015
  */
 @SuppressWarnings("serial")
-public class PanelSwitchingPanel extends JPanel {
+public class PanelSwitchingPanel extends JLayeredPane {
 	public static final Side LEFT = Side.left;
 	public static final Side RIGHT = Side.right;
 	public static final Side TOP = Side.top;
@@ -60,6 +63,8 @@ public class PanelSwitchingPanel extends JPanel {
 
 	/** currently displayed Panel */
 	private JPanel currentPanel;
+	/** glass pane to prevent interaction during switch */
+	private JPanel glassPanel;
 	/** tells if a panel switching operation is in progress */
 	private volatile Boolean isSwitching = false;
 	
@@ -69,27 +74,53 @@ public class PanelSwitchingPanel extends JPanel {
 	 * @param displaypanel initial JPanel to be displayed.
 	 */
 	public PanelSwitchingPanel(JPanel displaypanel) {
+		this.glassPanel = new JPanel();
+		glassPanel.setOpaque(false);
+		glassPanel.setVisible(false);
+		glassPanel.addMouseListener(new MouseAdapter(){
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				System.out.println("glasspanel!");
+			}
+		});
+		glassPanel.setFocusable(true);
+		
 		this.currentPanel = displaypanel;
 		super.setLayout(null);
 		this.addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(ComponentEvent e) {
 				currentPanel.setSize(getSize());
+				glassPanel.setSize(getSize());
 				currentPanel.setLocation(0, 0);
+				glassPanel.setLocation(0, 0);
 				validate();
 			}
 		});
-		this._add(currentPanel);
+		this._add(currentPanel, JLayeredPane.DEFAULT_LAYER);
+		this._add(glassPanel, JLayeredPane.PALETTE_LAYER);
+	}
+	
+	/** 
+	 * protected add method that works like {@link JPanel#add(Component, Object)}.<br>
+	 * This is a workaround to still offer the add method for in class usage
+	 * or usage of subclasses.
+	 * @param comp to be added.
+	 * @param constraints an object expressing layout constraints for this component
+	 * @return the component argument
+	 */
+	protected void _add(Component comp, Object constraints){
+		super.add(comp, constraints);
 	}
 	
 	/** 
 	 * protected add method that works like {@link JPanel#add(Component)}.<br>
-	 * This is a workarround to still offer the add method for in class usage
+	 * This is a workaround to still offer the add method for in class usage
 	 * or usage of subclasses.
 	 * @param comp to be added.
 	 * @return the component argument
 	 */
-	protected Component _add(Component comp){
+	protected Component _add(Component comp) {
 		return super.add(comp);
 	}
 	
@@ -133,8 +164,9 @@ public class PanelSwitchingPanel extends JPanel {
 		}
 		this.isSwitching = true;
 		}
-
-		this._add(newpanel);
+		
+		this.activateGlassPane(true);
+		this._add(newpanel, JLayeredPane.DEFAULT_LAYER);
 		synchronized (this.getTreeLock()) {
 			newpanel.setSize(getSize());
 			newpanel.validate();
@@ -158,6 +190,19 @@ public class PanelSwitchingPanel extends JPanel {
 		JPanel oldPanel = currentPanel;
 		currentPanel = newpanel;
 		return oldPanel;
+	}
+	
+	/**
+	 * Activates/Deactivates the glass panel. This prevents interactions with
+	 * the underlying panel of the default layer.
+	 * @param active 
+	 */
+	protected void activateGlassPane(boolean active){
+		glassPanel.setVisible(active);
+	      if (active) {
+	         glassPanel.requestFocusInWindow();
+	         glassPanel.setFocusTraversalKeysEnabled(false);
+	      } 
 	}
 	
 	/**
@@ -246,7 +291,8 @@ public class PanelSwitchingPanel extends JPanel {
 			JPanel oldPanel = this.currentPanel;
 			currentPanel = panel;
 			this.remove(oldPanel);
-			this._add(panel);
+			this._add(panel, JLayeredPane.DEFAULT_LAYER);
+			
 			panel.setLocation(0, 0);
 			panel.setSize(this.getWidth(), this.getHeight());
 			this.validate();
@@ -261,6 +307,9 @@ public class PanelSwitchingPanel extends JPanel {
 	public JPanel getCurrentPanel(){
 		return this.currentPanel;
 	}
+	
+	
+	// -------------------------------------------------------------------
 	
 	/** 
 	 * enum for sides, used to specify the side where the new JPanel is slid
@@ -354,14 +403,33 @@ public class PanelSwitchingPanel extends JPanel {
 		@Override
 		protected void done() {
 			parent.remove(panel1);
-			parent.isSwitching = false;
 			panel2.setLocation(0, 0);
 			panel2.setSize(parent.getSize());
+			parent.isSwitching = false;
+			parent.activateGlassPane(false);
 			parent.revalidate();
 			parent.repaint();
 		}
 	}
 
+	
+	/** delegates to current panel */
+	@Override
+	public Dimension getMinimumSize() {
+		return getCurrentPanel().getMinimumSize();
+	}
+	
+	/** delegates to current panel */
+	@Override
+	public Dimension getPreferredSize() {
+		return getCurrentPanel().getPreferredSize();
+	}
+	
+	/** delegates to current panel */
+	@Override
+	public Dimension getMaximumSize() {
+		return getCurrentPanel().getMaximumSize();
+	}
 
 	/** does nothing */
 	@Override
@@ -406,8 +474,5 @@ public class PanelSwitchingPanel extends JPanel {
 	public void add(PopupMenu popup) {
 		throw new UnsupportedOperationException("Cannot use PopupMenus with a " + this.getClass().getCanonicalName() + ".\nAdd the PopupMenu to the contained JPanel instead.");
 	}
-	
-	
-	
 
 }

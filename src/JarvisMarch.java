@@ -81,7 +81,7 @@ public class JarvisMarch {
 		return hullToReturn;
 	}
 	
-	
+	// http://pastebin.com/6eBn8p7c
 	private static int getIndexOfLeftMostPoint(double[][] points){
 		int index = 0;
 		double x = points[0][0];

@@ -1,3 +1,4 @@
+package old.gui;
 /* PhotoCornersLayout.java
  * 
  * Copyright (c) 2013 David Haegele

@@ -1,3 +1,4 @@
+package old.gui;
 /* PanelSwitchingPanel.java
  * 
  * Copyright (c) 2015 David Haegele

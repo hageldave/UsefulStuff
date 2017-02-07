@@ -1,3 +1,4 @@
+package old.gui;
 /*
  * CoordinateSystemDisplay.java
  *

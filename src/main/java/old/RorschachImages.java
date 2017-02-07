@@ -1,3 +1,4 @@
+package old;
 /* RorschachImages.java
  * 
  * Copyright (c) 2013 David Haegele
